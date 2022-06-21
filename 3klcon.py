@@ -39,7 +39,7 @@ print(colored("(+) Scan Misconfiguration ","green", attrs=[]))
 print(colored("(+) Scan Vulnerabilities","green", attrs=[]))
 print(colored("(+) Scan for website technologies and services\n", "green", attrs=[]))
 print(" ")
-print(colored("(-) You're using an old version of the tool. It's recommended to update to v1.1", "red"))
+print(colored("(-) You're using an old version of the tool. It's recommended to update to v1.2 by Taki", "red"))
 
 #get user input 
 def get_user_input():
@@ -94,7 +94,7 @@ print(colored("\n--------------------------------------------", 'red', attrs=['b
 print(colored("[+] Start collecting resolved Subdomains", 'red', attrs=['bold']))
 print(colored("--------------------------------------------", 'red', attrs=['bold']))
 subprocess.call("assetfinder -subs-only " + target + " > " + subdomains_output, shell=True) 
-subprocess.call("subfinder -silent -d " + target + " >> " + subdomains_output, shell=True) 
+subprocess.call("subfinder -silent -d " + target + " -all -config /root/.config/subfinder/provider-config.yaml >> " + subdomains_output, shell=True) 
 subprocess.call("cat " + subdomains_output + " | qsreplace | httpx -follow-redirects -silent > " + resolved_subdomain , shell=True) 
 subprocess.call("cat " + resolved_subdomain + " | cut -d : -f2 | cut -c 3- > " + live_subdomains, shell=True) 
 subprocess.call("rm " + subdomains_output + " " + resolved_subdomain, shell=True)
@@ -105,7 +105,7 @@ print(colored("Process DONE!\nFile Name: live_subdomains.txt\n" , 'blue', attrs=
 print(colored("\n--------------------------------------------", 'red', attrs=['bold']))
 print(colored("[+] Start collecting Sub-subdomains", 'red', attrs=['bold']))
 print(colored("--------------------------------------------", 'red', attrs=['bold']))
-subprocess.call("altdns -i " + live_subdomains +" -o data_output_altdns.txt -w ../word_lists/words.txt -r -s " + altdns_output, shell=True)
+subprocess.call("altdns -i " + live_subdomains +" -o data_output_altdns.txt -w /root/work/altdns/words.txt -r -s " + altdns_output, shell=True)
 print(colored("Process DONE!\nResults in altdns_output.txt", 'blue', attrs=['bold']))
 
 
@@ -113,8 +113,8 @@ print(colored("Process DONE!\nResults in altdns_output.txt", 'blue', attrs=['bol
 print(colored("\n--------------------------------------------", 'red', attrs=['bold']))
 print(colored("[+] Start Content Discovery ", 'red', attrs=['bold']))
 print(colored("--------------------------------------------", 'red', attrs=['bold']))
-subprocess.call("python3 ../tools/dirsearch/dirsearch.py -L " + live_subdomains + " -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -e js,php,bak,txt,asp,aspx,jsp,html,zip,jar,sql,json,old,gz,shtml,log,swp,yaml,yml,config,save,rsa,ppk,tar --simple-report dirsearch_output.txt > subdomains_content_discovery.txt ", shell=True)
-subprocess.call("python3 ../tools/dirsearch/dirsearch.py -L " + altdns_output + " -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -e js,php,bak,txt,asp,aspx,jsp,html,zip,jar,sql,json,old,gz,shtml,log,swp,yaml,yml,config,save,rsa,ppk,tar --simple-report dirsearch_output_altdns.txt > altdns_subdomains_content_discovery.txt ", shell=True)
+subprocess.call("python3 /root/work/dirsearch/dirsearch.py -L " + live_subdomains + " -w /root/work/SecLists/Discovery/Web-Content/directory-list-2.3-small.txt -e js,php,bak,txt,asp,aspx,jsp,html,zip,jar,sql,json,old,gz,shtml,log,swp,yaml,yml,config,save,rsa,ppk,tar --simple-report dirsearch_output.txt > subdomains_content_discovery.txt ", shell=True)
+subprocess.call("python3 /root/work/dirsearch/dirsearch.py -L " + altdns_output + " -w /root/work/SecLists/Discovery/Web-Content/directory-list-2.3-small.txt -e js,php,bak,txt,asp,aspx,jsp,html,zip,jar,sql,json,old,gz,shtml,log,swp,yaml,yml,config,save,rsa,ppk,tar --simple-report dirsearch_output_altdns.txt > altdns_subdomains_content_discovery.txt ", shell=True)
 print(colored("Process DONE!\nFile's Names: subdomains_content_discovery.txt & altdns_subdomains_content_discovery.txt", 'blue', attrs=['bold']))
 
 
@@ -155,12 +155,12 @@ print(colored("[+] Start Searching at GitHub", 'red', attrs=['bold']))
 print(colored("[-] You Must create file 'config.yml' into git-hound dir and set your GitHub username and password", 'blue', attrs=[]))
 print(colored("--------------------------------------------", 'red', attrs=['bold']))
 try:
-	subprocess.call("cat Live_subdomains.txt | git-hound --config-file ../tools/git-hound/config.yml --dig-files --dig-commits > " + git_secrets)
+	subprocess.call("cat Live_subdomains.txt | git-hound --config-file /root/work/config.yml --dig-files --dig-commits > " + git_secrets)
 	subprocess.call("mv " + git_secrets + " GitHub_secrets/", shell=True)
 	print(colored("Process DONE!\nFile Name: Github_Secrets.txt", 'blue', attrs=['bold']))
 except: 
 	print(colored("[-] Git-hound asked for 2FA so it stopped in your automation, So Kindly perform this process maually\n[+] Get into domain folder 'Results directory' and run this command", 'red', attrs=[]))
-	print(colored("[+] Command: cat Live_subdomains.txt | git-hound --config-file ../tools/git-hound/config.yml --dig-files --dig-commits", 'blue', attrs=[]))
+	print(colored("[+] Command: cat Live_subdomains.txt | git-hound --config-file /root/work/config.yml --dig-files --dig-commits", 'blue', attrs=[]))
 	pass
 
 #create github search links 
@@ -197,6 +197,6 @@ print(colored("[+] Please check updates for Nuclei", 'cyan'))
 print(colored("--------------------------------------------", 'red', attrs=['bold']))
 subprocess.call("mkdir automation_scanners", shell=True) 
 #test all subdomains for service and vulnerabilities - nuclei
-subprocess.call("cat " + live_subdomains + " | nuclei -t nuclei-templates -o automation_scanners/" + nuclei, shell=True )
-subprocess.call("subjack -w " + live_subdomains +" -timeout 30 -ssl -c /root/go/src/github.com/haccer/subjack/fingerprints.json -v -m >> automation_scanners/" + subdomain_takeover, shell=True)
+subprocess.call("cat " + live_subdomains + " | nuclei -t /root/nuclei-templates -o automation_scanners/" + nuclei, shell=True )
+subprocess.call("subjack -w " + live_subdomains +" -timeout 30 -ssl -c /root/work/fingerprints.json -v -m >> automation_scanners/" + subdomain_takeover, shell=True)
 #=========================================#
