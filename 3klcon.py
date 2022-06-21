@@ -105,7 +105,7 @@ print(colored("Process DONE!\nFile Name: live_subdomains.txt\n" , 'blue', attrs=
 print(colored("\n--------------------------------------------", 'red', attrs=['bold']))
 print(colored("[+] Start collecting Sub-subdomains", 'red', attrs=['bold']))
 print(colored("--------------------------------------------", 'red', attrs=['bold']))
-subprocess.call("altdns -i " + live_subdomains +" -o data_output_altdns.txt -w /root/work/altdns/words.txt -r -s " + altdns_output, shell=True)
+subprocess.call("altdns -i " + live_subdomains +" -o data_output_altdns.txt -w /root/work/SecLists/Discovery/DNS/dns-Jhaddix.txt- -r -s " + altdns_output, shell=True)
 print(colored("Process DONE!\nResults in altdns_output.txt", 'blue', attrs=['bold']))
 
 
